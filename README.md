@@ -27,3 +27,7 @@ After running the server,to see the documentation after running the server - hea
 <li><strike>Auth: Add users and roles</strike></li>
 <li>Write E2E for flows: {login, signup, doc-CRUD, doc-sign}</li>
 </ul>
+
+## UML
+
+![a little system](/UML.png)
