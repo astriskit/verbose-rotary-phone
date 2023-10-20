@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { Doc } from '../entities/doc.entity';
+import { PartialType } from '@nestjs/swagger';
+import { CreateDocDto } from './create-doc.dto';
 
-export class UpdateDocDto extends PartialType(Doc) {}
+export class UpdateDocDto extends PartialType(CreateDocDto) {}
