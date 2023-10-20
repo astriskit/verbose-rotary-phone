@@ -6,14 +6,26 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { DocsService } from './docs.service';
 import { CreateDocDto } from './dto/create-doc.dto';
 import { UpdateDocDto } from './dto/update-doc.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles/roles.decorator';
+import { RolesGuard } from 'src/auth/roles/roles.guard';
 
+@ApiBearerAuth()
 @ApiTags('docs')
 @Controller('docs')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class DocsController {
   constructor(private readonly docsService: DocsService) {}
 
@@ -25,8 +37,9 @@ export class DocsController {
     status: 403,
     description: 'Forbidden',
   })
-  create(@Body() createDocDto: CreateDocDto) {
-    const currentUserId = undefined; // FIX_ME
+  @Roles(['Signee'])
+  create(@Body() createDocDto: CreateDocDto, @Request() req) {
+    const currentUserId = req?.user?.id;
     return this.docsService.create(createDocDto, currentUserId);
   }
 
@@ -34,8 +47,9 @@ export class DocsController {
     summary: "find all the current owner's documents",
   })
   @Get()
-  findAll() {
-    const currentUserId = undefined; // FIX_ME
+  @Roles(['Signee'])
+  findAll(@Request() req) {
+    const currentUserId = req?.user?.id;
     return this.docsService.findAll(currentUserId);
   }
 
@@ -43,8 +57,8 @@ export class DocsController {
     summary: 'Gets the document ',
   })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    const currentUserId = undefined; // FIX_ME
+  findOne(@Param('id') id: string, @Request() req) {
+    const currentUserId = req?.user?.id;
     return this.docsService.findOne(+id, currentUserId);
   }
 
@@ -52,8 +66,13 @@ export class DocsController {
     summary: 'Update the document',
   })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDocDto: UpdateDocDto) {
-    const currentUserId = undefined; // FIX_ME
+  @Roles(['Signee'])
+  update(
+    @Param('id') id: string,
+    @Body() updateDocDto: UpdateDocDto,
+    @Request() req,
+  ) {
+    const currentUserId = req?.user?.id;
     return this.docsService.update(+id, currentUserId, updateDocDto);
   }
 
@@ -61,8 +80,9 @@ export class DocsController {
     summary: 'Delete the document',
   })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    const currentUser = undefined; // FIX_ME
+  @Roles(['Signee'])
+  remove(@Param('id') id: string, @Request() req) {
+    const currentUser = req?.user?.id;
     return this.docsService.remove(+id, currentUser);
   }
 
@@ -70,8 +90,9 @@ export class DocsController {
     summary: 'Sign the document; Should be used by the Signer.',
   })
   @Patch(':id/sign')
-  sign(@Param('id') id: string) {
-    const signer = undefined; // FIX_ME
+  @Roles(['Signer'])
+  sign(@Param('id') id: string, @Request() req) {
+    const signer = req?.user?.id;
     this.docsService.sign(+id, signer);
   }
 
@@ -79,8 +100,9 @@ export class DocsController {
     summary: 'Recall the document',
   })
   @Delete(':id/recall')
-  recall(@Param('id') id: string) {
-    const owner = undefined; // FIX_ME
+  @Roles(['Signee'])
+  recall(@Param('id') id: string, @Request() req) {
+    const owner = req?.user?.id;
     this.docsService.recall(+id, owner);
   }
 }

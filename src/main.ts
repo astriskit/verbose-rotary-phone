@@ -9,12 +9,7 @@ async function bootstrap() {
     .setTitle('E-signer api documentation')
     .setDescription('documentation')
     .setVersion('1.0')
-    .addTag('docs-api')
-    .addBearerAuth({
-      type: 'http',
-      in: 'header',
-      name: 'bearer',
-    })
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
